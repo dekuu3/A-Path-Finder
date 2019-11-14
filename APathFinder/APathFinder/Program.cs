@@ -26,6 +26,7 @@ namespace APathFinder
             //Checking if the binary matrix provided is correct (all numbers must be either 0 or 1)
             var isMatrixValid = IsMatrixValid(inputFileText);
             Output(isMatrixValid, outputFile, solution);
+
         }
         #endregion
 
@@ -55,6 +56,14 @@ namespace APathFinder
                 }
             }
             return 3;
+        }
+        #endregion
+
+        #region Calculate H Score
+        static int CalculateHScore(int x, int y, int targetx, int targety)
+        {
+            var H = Math.Sqrt(Math.Pow(targetx - x, 2) + Math.Pow(targety - y, 2));
+            return Convert.ToInt32(H);
         }
         #endregion
 
