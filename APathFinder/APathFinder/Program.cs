@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace APathFinder
 {
@@ -27,6 +25,44 @@ namespace APathFinder
             var isMatrixValid = IsMatrixValid(inputFileText);
             Output(isMatrixValid, outputFile, solution);
 
+            //Adding caverns to their own substring
+            var cavernsFinalIndex = inputFileText[0] * 2;
+
+            //Initialising some values
+            var targetCoordsX = TargetCoordsX(inputFileText);
+            var targetCoordsY = TargetCoordsY(inputFileText);
+            
+            Location current = null;
+            var start = new Location { X = inputFileText[1], Y = inputFileText[2] };
+            var target = new Location { X = targetCoordsX, Y = targetCoordsY};
+            var openList = new List<Location>();
+            var closedList = new List<Location>();
+            int g = 0;
+
+            //Starting by adding starting coords to open list
+            openList.Add(start);
+
+            while(openList.Count > 0)
+            {
+                //get path with lowest F score
+                var lowest = openList.Min(l => l.F);
+                current = openList.First(l => l.F == lowest);
+
+                //add the current node to the closed list
+                closedList.Add(current);
+
+                //remove it from the open list
+                openList.Remove(current);
+
+                //if we added the destination to the closed list, we've found a path
+                if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
+                {
+                    //Output solution
+                    break;
+                }
+
+                var walkablePaths = GetWalkablePaths(current.X, current.Y, inputFileText);
+            }
         }
         #endregion
 
@@ -56,6 +92,61 @@ namespace APathFinder
                 }
             }
             return 3;
+        }
+        #endregion
+
+        #region Calculate Target X Coords
+        static int TargetCoordsX(int[] inputFileText)
+        {
+            var targetXindex = (inputFileText[0] * 2) - 1;
+
+            return inputFileText[targetXindex];
+        }
+        #endregion
+
+        #region Calculate Target Y Coords
+        static int TargetCoordsY(int[] inputFileText)
+        {
+            var targetYindex = inputFileText[0] * 2;
+
+            return inputFileText[targetYindex];
+        }
+        #endregion
+
+        #region Calculate Walkable Paths
+        static List<Location> GetWalkablePaths(int x, int y, int[] inputFileText)
+        {
+            var cavernsFinalIndex = 1 + inputFileText[0] * 2;
+            var count = 0; //To count coord order
+            var count1 = 0; //To count binary order
+            var proposedLocations = new List<Location>();
+
+            //calculating coord order number (Is this the first coord? second?...) so we can then fetch the binary matrix that tells us which paths are walkable
+            for(int i = 1; i < cavernsFinalIndex; i = i + 2)
+            {
+                count++;
+                if(inputFileText[i] == x && inputFileText[i+1] == y)
+                {
+                    //fetching the binary matrix order number, so we can then get walkable paths 
+                    for(var j = cavernsFinalIndex; j < inputFileText.Length; j = j + inputFileText[0])
+                    {
+                        count1++;
+                        if(count == count1)
+                        {
+                            //fetching the walkable paths (walkable if == 1)
+                            for(var k = 1; k < inputFileText[0] + 1; k++)
+                            {
+                                if(inputFileText[j+k - 1] == 1)
+                                {
+                                    new Location { X = inputFileText[], Y = inputFileText[]};
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return proposedLocations.Where(l => inputFileText[l.Y][l.X] == /*free*/ || inputFileText[l.Y][l.X] == /*target coords*/)
+
         }
         #endregion
 
