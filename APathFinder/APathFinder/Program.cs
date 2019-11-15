@@ -118,7 +118,8 @@ namespace APathFinder
         {
             var cavernsFinalIndex = 1 + inputFileText[0] * 2;
             var count = 0; //To count coord order
-            var count1 = 0; //To count binary order
+            var count1 = 0; //To count binary 
+            var count2 = 0; //To be able to fetch coord order again
             var proposedLocations = new List<Location>();
 
             //calculating coord order number (Is this the first coord? second?...) so we can then fetch the binary matrix that tells us which paths are walkable
@@ -136,9 +137,17 @@ namespace APathFinder
                             //fetching the walkable paths (walkable if == 1)
                             for(var k = 1; k < inputFileText[0] + 1; k++)
                             {
-                                if(inputFileText[j+k - 1] == 1)
+                                count2 = 0;
+                                if (inputFileText[j+k - 1] == 1)
                                 {
-                                    new Location { X = inputFileText[], Y = inputFileText[]};
+                                    for(var n = 1; n < cavernsFinalIndex; n = n + 2)
+                                    {
+                                        count2++;
+                                        if(count2 == k)
+                                        {
+                                            new Location {X = inputFileText[n], Y = inputFileText[n+1]};
+                                        }
+                                    }
                                 }
                             }
                         }
