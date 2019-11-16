@@ -25,9 +25,6 @@ namespace APathFinder
             var isMatrixValid = IsMatrixValid(inputFileText);
             Output(isMatrixValid, outputFile, solution);
 
-            //Adding caverns to their own substring
-            var cavernsFinalIndex = inputFileText[0] * 2;
-
             //Initialising some values
             var targetCoordsX = TargetCoordsX(inputFileText);
             var targetCoordsY = TargetCoordsY(inputFileText);
@@ -62,6 +59,22 @@ namespace APathFinder
                 }
 
                 var walkablePaths = GetWalkablePaths(current.X, current.Y, inputFileText);
+
+                g = g + CalculateGScore(start.X, start.Y, current.X, current.Y);
+
+                foreach(var walkablePath in walkablePaths )
+                {
+                    //if this walkable path is already in the closed list, ignore it
+
+                    //if it's not in the open list...
+
+                        //compute its score, set the parent
+
+                        //and add it to the open list
+
+                    //else test if using the current G score makes the walkable path's F score
+                    //lower, if yes update the parent because it means it's a better path
+                }
             }
         }
         #endregion
@@ -154,8 +167,7 @@ namespace APathFinder
                     }
                 }
             }
-            return proposedLocations.Where(l => inputFileText[l.Y][l.X] == /*free*/ || inputFileText[l.Y][l.X] == /*target coords*/)
-
+            return proposedLocations.Where(l => inputFileText[l.Y][l.X] == /*free*/ || inputFileText[l.Y][l.X] == /*target coords*/).ToList();
         }
         #endregion
 
@@ -163,6 +175,14 @@ namespace APathFinder
         static int CalculateHScore(int x, int y, int targetx, int targety)
         {
             var H = Math.Sqrt(Math.Pow(targetx - x, 2) + Math.Pow(targety - y, 2));
+            return Convert.ToInt32(H);
+        }
+        #endregion
+
+        #region Calculate G Score
+        static int CalculateGScore(int startx, int starty, int currentx, int currenty)
+        {
+            var H = Math.Sqrt(Math.Pow(currentx - startx, 2) + Math.Pow(currenty - starty, 2));
             return Convert.ToInt32(H);
         }
         #endregion
