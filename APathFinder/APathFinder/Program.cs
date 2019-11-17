@@ -10,12 +10,12 @@ namespace APathFinder
         #region Main
         static void Main(string[] args)
         {
-            var inputFile = args[0];
-            var outputFile = args[1];
+            int[] inputFileText = { 20, 2, 14, 5, 10, 8, 14, 12, 10, 18, 15, 1, 3, 6, 4, 12, 4, 18, 3, 22, 7, 16, 8, 8, 7, 4, 0, 9, 0, 14, 1, 19, 1, 24, 1, 28, 1, 27, 13, 19, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            var outputFile = "!";
             var solution = "0";
 
             //Converting the input file into an int[]
-            int[] inputFileText = Array.ConvertAll(File.ReadAllText(inputFile).Split(','), s => int.Parse(s));
+            //int[] inputFileText = Array.ConvertAll(File.ReadAllText(inputFile).Split(','), s => int.Parse(s));
 
             //Checking if the input text is in the right format (Length == N + N*2 + N*N)
             var isInputValid = IsInputValid(inputFileText, inputFileText.Length);
@@ -65,17 +65,35 @@ namespace APathFinder
                 foreach(var walkablePath in walkablePaths )
                 {
                     //if this walkable path is already in the closed list, ignore it
+                    if (closedList.FirstOrDefault(l => l.X == walkablePath.X && l.Y == walkablePath.Y) != null)
+                        continue;
 
                     //if it's not in the open list...
-
+                    if(openList.FirstOrDefault(l => l.X == walkablePath.X && l.Y == walkablePath.Y) == null)
+                    {
                         //compute its score, set the parent
+                        walkablePath.G = g;
+                        walkablePath.H = CalculateHScore(walkablePath.X, walkablePath.Y, target.X, target.Y);
+                        walkablePath.F = walkablePath.G + walkablePath.H;
+                        walkablePath.Parent = current;
 
                         //and add it to the open list
-
-                    //else test if using the current G score makes the walkable path's F score
-                    //lower, if yes update the parent because it means it's a better path
+                        openList.Insert(0, walkablePath);
+                    }
+                    else
+                    {
+                        //else test if using the current G score makes the walkable path's F score
+                        //lower, if yes update the parent because it means it's a better path
+                        if(g + walkablePath.H < walkablePath.F)
+                        {
+                            walkablePath.G = g;
+                            walkablePath.F = walkablePath.G + walkablePath.H;
+                            walkablePath.Parent = current;
+                        }
+                    }
                 }
             }
+
         }
         #endregion
 
@@ -158,7 +176,7 @@ namespace APathFinder
                                         count2++;
                                         if(count2 == k)
                                         {
-                                            new Location {X = inputFileText[n], Y = inputFileText[n+1]};
+                                            proposedLocations.Add(new Location {X = inputFileText[n], Y = inputFileText[n+1]});
                                         }
                                     }
                                 }
@@ -167,7 +185,7 @@ namespace APathFinder
                     }
                 }
             }
-            return proposedLocations.Where(l => inputFileText[l.Y][l.X] == /*free*/ || inputFileText[l.Y][l.X] == /*target coords*/).ToList();
+            return proposedLocations;
         }
         #endregion
 
