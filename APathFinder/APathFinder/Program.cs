@@ -10,12 +10,13 @@ namespace APathFinder
         #region Main
         static void Main(string[] args)
         {
-            int[] inputFileText = { 20, 2, 14, 5, 10, 8, 14, 12, 10, 18, 15, 1, 3, 6, 4, 12, 4, 18, 3, 22, 7, 16, 8, 8, 7, 4, 0, 9, 0, 14, 1, 19, 1, 24, 1, 28, 1, 27, 13, 19, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            var outputFile = "!";
-            var solution = "0";
+            var inputFile = args[0];
+            var outputFile = Path.ChangeExtension(inputFile, ".csn");
+            var solution = "";
+            var outputText = "";
 
             //Converting the input file into an int[]
-            //int[] inputFileText = Array.ConvertAll(File.ReadAllText(inputFile).Split(','), s => int.Parse(s));
+            int[] inputFileText = Array.ConvertAll(File.ReadAllText(inputFile).Split(','), s => int.Parse(s));
 
             //Checking if the input text is in the right format (Length == N + N*2 + N*N)
             var isInputValid = IsInputValid(inputFileText, inputFileText.Length);
@@ -54,7 +55,7 @@ namespace APathFinder
                 //if we added the destination to the closed list, we've found a path
                 if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
                 {
-                    //Output solution
+                    Output(1, outputFile, outputText);
                     break;
                 }
 
@@ -91,9 +92,9 @@ namespace APathFinder
                             walkablePath.Parent = current;
                         }
                     }
+                    outputText = outputText + walkablePath.X + " " + walkablePath.Y + " ";
                 }
             }
-
         }
         #endregion
 
@@ -147,10 +148,9 @@ namespace APathFinder
         #region Calculate Walkable Paths
         static List<Location> GetWalkablePaths(int x, int y, int[] inputFileText)
         {
-            var cavernsFinalIndex = 1 + inputFileText[0] * 2;
+            var cavernsFinalIndex = inputFileText[0] * 2;
             var count = 0; //To count coord order
             var count1 = 0; //To count binary 
-            var count2 = 0; //To be able to fetch coord order again
             var proposedLocations = new List<Location>();
 
             //calculating coord order number (Is this the first coord? second?...) so we can then fetch the binary matrix that tells us which paths are walkable
@@ -160,25 +160,19 @@ namespace APathFinder
                 if(inputFileText[i] == x && inputFileText[i+1] == y)
                 {
                     //fetching the binary matrix order number, so we can then get walkable paths 
-                    for(var j = cavernsFinalIndex; j < inputFileText.Length; j = j + inputFileText[0])
+                    for(var j = cavernsFinalIndex + count; j < inputFileText.Length; j = j + inputFileText[0])
                     {
+                        var count2 = 0; //To be able to fetch coord order again
                         count1++;
-                        if(count == count1)
+                        if (inputFileText[j] == 1)
                         {
-                            //fetching the walkable paths (walkable if == 1)
-                            for(var k = 1; k < inputFileText[0] + 1; k++)
+                            for (var n = 1; n < cavernsFinalIndex; n = n + 2)
                             {
-                                count2 = 0;
-                                if (inputFileText[j+k - 1] == 1)
+                                count2++;
+                                if (count2 == count1)
                                 {
-                                    for(var n = 1; n < cavernsFinalIndex; n = n + 2)
-                                    {
-                                        count2++;
-                                        if(count2 == k)
-                                        {
-                                            proposedLocations.Add(new Location {X = inputFileText[n], Y = inputFileText[n+1]});
-                                        }
-                                    }
+                                    proposedLocations.Add(new Location { X = inputFileText[n], Y = inputFileText[n + 1] });
+                                    break;
                                 }
                             }
                         }
