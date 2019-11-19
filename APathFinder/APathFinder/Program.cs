@@ -10,8 +10,8 @@ namespace APathFinder
         #region Main
         static void Main(string[] args)
         {
-            var inputFile = args[0];
-            var outputFile = Path.ChangeExtension(inputFile, ".csn");
+            var inputFile = args[0] + ".cav";
+            var outputFile = args[0] + ".csn";
             var solution = "";
             var outputText = "";
 
@@ -29,10 +29,10 @@ namespace APathFinder
             //Initialising some values
             var targetCoordsX = TargetCoordsX(inputFileText);
             var targetCoordsY = TargetCoordsY(inputFileText);
-            
+
             Location current = null;
             var start = new Location { X = inputFileText[1], Y = inputFileText[2] };
-            var target = new Location { X = targetCoordsX, Y = targetCoordsY};
+            var target = new Location { X = targetCoordsX, Y = targetCoordsY };
             var openList = new List<Location>();
             var closedList = new List<Location>();
             int g = 0;
@@ -40,7 +40,7 @@ namespace APathFinder
             //Starting by adding starting coords to open list
             openList.Add(start);
 
-            while(openList.Count > 0)
+            while (openList.Count > 0)
             {
                 //get path with lowest F score
                 var lowest = openList.Min(l => l.F);
@@ -55,7 +55,6 @@ namespace APathFinder
                 //if we added the destination to the closed list, we've found a path
                 if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
                 {
-                    Output(1, outputFile, outputText);
                     break;
                 }
 
@@ -63,14 +62,14 @@ namespace APathFinder
 
                 g = g + CalculateGScore(start.X, start.Y, current.X, current.Y);
 
-                foreach(var walkablePath in walkablePaths )
+                foreach (var walkablePath in walkablePaths)
                 {
                     //if this walkable path is already in the closed list, ignore it
                     if (closedList.FirstOrDefault(l => l.X == walkablePath.X && l.Y == walkablePath.Y) != null)
                         continue;
 
                     //if it's not in the open list...
-                    if(openList.FirstOrDefault(l => l.X == walkablePath.X && l.Y == walkablePath.Y) == null)
+                    if (openList.FirstOrDefault(l => l.X == walkablePath.X && l.Y == walkablePath.Y) == null)
                     {
                         //compute its score, set the parent
                         walkablePath.G = g;
@@ -85,17 +84,46 @@ namespace APathFinder
                     {
                         //else test if using the current G score makes the walkable path's F score
                         //lower, if yes update the parent because it means it's a better path
-                        if(g + walkablePath.H < walkablePath.F)
+                        if (g + walkablePath.H < walkablePath.F)
                         {
                             walkablePath.G = g;
                             walkablePath.F = walkablePath.G + walkablePath.H;
                             walkablePath.Parent = current;
                         }
                     }
-                    outputText = outputText + walkablePath.X + " " + walkablePath.Y + " ";
                 }
             }
+
+            //Adds the best path to a outputText
+            while (current != null)
+            {
+                var countcoords = 0;
+                for (int l = 1; l < 1 + inputFileText[0] * 2; l = l + 2)
+                {
+                    countcoords++;
+                    if (inputFileText[l] == current.X && inputFileText[l + 1] == current.Y)
+                    {
+                        outputText = outputText + countcoords + " ";
+                        break;
+                    }
+                }
+                current = current.Parent;
+            }
+
+            //Reverses the output text
+            solution = Reverse(outputText);
+
+            //Checks for win
+            if(CheckWin(solution, inputFileText) == true)
+            {
+                Output(1, outputFile, solution);
+            }
+            else
+            {
+                Output(2, outputFile, solution);
+            }
         }
+
         #endregion
 
         #region Input File Validation
@@ -113,7 +141,7 @@ namespace APathFinder
         #region Matrix Validation
         private static int IsMatrixValid(int[] inputFileText)
         {
-            var matrixStartIndex = 1 + inputFileText[0]*2;
+            var matrixStartIndex = 1 + inputFileText[0] * 2;
 
             for (int i = matrixStartIndex; i < inputFileText.Length; i++)
             {
@@ -154,13 +182,13 @@ namespace APathFinder
             var proposedLocations = new List<Location>();
 
             //calculating coord order number (Is this the first coord? second?...) so we can then fetch the binary matrix that tells us which paths are walkable
-            for(int i = 1; i < cavernsFinalIndex; i = i + 2)
+            for (int i = 1; i < cavernsFinalIndex; i = i + 2)
             {
                 count++;
-                if(inputFileText[i] == x && inputFileText[i+1] == y)
+                if (inputFileText[i] == x && inputFileText[i + 1] == y)
                 {
                     //fetching the binary matrix order number, so we can then get walkable paths 
-                    for(var j = cavernsFinalIndex + count; j < inputFileText.Length; j = j + inputFileText[0])
+                    for (var j = cavernsFinalIndex + count; j < inputFileText.Length; j = j + inputFileText[0])
                     {
                         var count2 = 0; //To be able to fetch coord order again
                         count1++;
@@ -199,6 +227,32 @@ namespace APathFinder
         }
         #endregion
 
+        #region Reverse
+        public static string Reverse(string s)
+        {
+            var splits = s.Split(' ');
+            Array.Reverse(splits);
+            string splits2 = String.Join(" ", splits);
+            return splits2;
+        }
+        #endregion
+
+        #region Found Solution?
+        public static bool CheckWin(string outputText, int[] inputFileText)
+        {
+            string last = outputText.Split(' ').LastOrDefault();
+
+            if(last ==  inputFileText[0].ToString())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
+
         #region Output
         private static void Output(int outputVar, string outputFile, string solution)
         {
@@ -215,7 +269,7 @@ namespace APathFinder
                     break;
                 case 2:
                     //no error = found NO solution
-                    File.WriteAllText(outputFile, solution);
+                    File.WriteAllText(outputFile, "0");
                     break;
                 default:
                     break;
