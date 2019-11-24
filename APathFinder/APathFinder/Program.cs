@@ -113,8 +113,10 @@ namespace APathFinder
             //Reverses the output text
             solution = Reverse(outputText);
 
+            solution = solution.Remove(0, 1);
+
             //Checks for win
-            if(CheckWin(solution, inputFileText) == true)
+            if (CheckWin(solution, inputFileText) == true)
             {
                 Output(1, outputFile, solution);
             }
